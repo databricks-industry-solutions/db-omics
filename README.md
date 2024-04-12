@@ -1,8 +1,8 @@
 <img src=https://raw.githubusercontent.com/databricks-industry-solutions/.github/main/profile/solacc_logo.png width="600px">
 
 [![DBR](https://img.shields.io/badge/DBR-HLS-red?logo=databricks&style=for-the-badge)](https://www.databricks.com/solutions/industries/healthcare-and-life-sciences)
-[![Life Sciences](https://img.shields.io/badge/RnD-Life-Sciences-blue?&style=for-the-badge)](hhttps://www.databricks.com/solutions/industries/life-sciences-industry-solutions)
-[![POC]('https://img.shields.io/badge/GENOMICS-Glow-green?style=for-the-badge')](https://github.com/projectglow/glow)
+[![Life Sciences](https://img.shields.io/badge/🔬RnD-LifeSciences-green?&style=for-the-badge)](hhttps://www.databricks.com/solutions/industries/life-sciences-industry-solutions)
+[![GLOW](https://img.shields.io/badge/🧬genomics-Glow-blue?style=for-the-badge)](https://github.com/projectglow/glow)
 
 ## Use Case
 This solution accelerator is aimed at Computational Biologists working with genomic data. It aims to integrate genomics data with other relevant datasets, presenting findings through interactive dashboards for clinical scientists, geneticists, and other practitioners. Our focus lies in analyzing population-level trends and identifying samples associated with specific causal variants previously discovered through Genome Wide Association Studies (GWAS). We utilize the [GWAS catalog](https://www.ebi.ac.uk/gwas/) in this accelerator.
