@@ -1,16 +1,16 @@
 <img src=https://raw.githubusercontent.com/databricks-industry-solutions/.github/main/profile/solacc_logo.png width="600px">
 
 [![DBR](https://img.shields.io/badge/DBR-HLS-red?logo=databricks&style=for-the-badge)](https://www.databricks.com/solutions/industries/healthcare-and-life-sciences)
-[![Life Sciences](https://img.shields.io/badge/🔬R&D-Life Sciences-blue?&style=for-the-badge)](hhttps://www.databricks.com/solutions/industries/life-sciences-industry-solutions)
-[![POC](https://img.shields.io/badge/🧬GENOMICS- Glow-green?style=for-the-badge)](https://github.com/projectglow/glow)
+[![Life Sciences](https://img.shields.io/badge/RnD-Life-Sciences-blue?&style=for-the-badge)](hhttps://www.databricks.com/solutions/industries/life-sciences-industry-solutions)
+[![POC]('https://img.shields.io/badge/GENOMICS-Glow-green?style=for-the-badge')](https://github.com/projectglow/glow)
 
 ## Use Case
 This solution accelerator is aimed at Computational Biologists working with genomic data. It aims to integrate genomics data with other relevant datasets, presenting findings through interactive dashboards for clinical scientists, geneticists, and other practitioners. Our focus lies in analyzing population-level trends and identifying samples associated with specific causal variants previously discovered through Genome Wide Association Studies (GWAS). We utilize the [GWAS catalog](https://www.ebi.ac.uk/gwas/) in this accelerator.
 
-Primarily, we leverage [Project Glow](https://github.com/projectglow/glow) to access 1000 Genomes Project data stored in public cloud repositories. We compute various sample-level and variant-level summary statistics, constructing a database of human genetic variation alongside GWAS catalog data. Subsequently, we develop an interactive dashboard facilitating exploration of genetic variation across different populations and facilitating the identification of samples associated with specific risk alleles for particular traits or diseases (refer to the demo of the dashboard below).
+Primarily, we leverage [Project Glow](https://github.com/projectglow/glow) to access 1000 Genomes Project data stored in public cloud repositories. We compute various sample-level and variant-level summary statistics, constructing a database of human genetic variation alongside GWAS catalog data. Subsequently, we develop an interactive dashboard facilitating exploration of genetic variation across different populations and facilitating the identification of samples associated with specific risk alleles for particular traits or diseases.
 
-[![Watch the video](https://img.youtube.com/vi/Hrr_VY_af7g/0.jpg)](https://www.youtube.com/watch?v=Hrr_VY_af7g). 
-  
+![](https://github.com/databricks-industry-solutions/db-omics/blob/53a78f42b9bb679c20094b62cd67c160b71c64e0/images/1KGDash.gif)
+
 To create the dashboard, you can simply import the lakeview dashboard's JSON file located in `./resources/1000 Genome Samples Dashboard.lvdash.json` in [Lakeview](https://docs.databricks.com/en/dashboards/lakeview.html).
 
 ### 1000 Genomes Project Variant Data: 
