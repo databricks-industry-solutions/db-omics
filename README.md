@@ -1,5 +1,4 @@
 <img src=https://raw.githubusercontent.com/databricks-industry-solutions/.github/main/profile/solacc_logo.png width="600px">
-
 [![DBR](https://img.shields.io/badge/DBR-HLS-red?logo=databricks&style=for-the-badge)](https://www.databricks.com/solutions/industries/healthcare-and-life-sciences)
 [![Life Sciences](https://img.shields.io/badge/🔬RnD-LifeSciences-green?&style=for-the-badge)](hhttps://www.databricks.com/solutions/industries/life-sciences-industry-solutions)
 [![GLOW](https://img.shields.io/badge/🧬genomics-Glow-blue?style=for-the-badge)](https://github.com/projectglow/glow)
