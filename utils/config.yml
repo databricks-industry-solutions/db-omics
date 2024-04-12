@@ -1,0 +1,7 @@
+vcf_path : 's3://1000genomes/phase1/analysis_results/shapeit2_phased_haplotypes/ALL.chr22.SHAPEIT2_integrated_phase1_v3.20101123.snps_indels_svs.genotypes.all.vcf.gz'
+sample_information_url: 'https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/working/20130606_sample_info/20130606_sample_info.txt'
+gwas_catalog_url: 'https://www.ebi.ac.uk/gwas/api/search/downloads/full'
+catalog_name: 'hls_lifesciences'
+variant_schema_name: 'variant_db'
+phenotype_schema_name: 'phenotype_db'
+gwas_results_schema_name: 'dbgap_db'

@@ -1,0 +1,2153 @@
+{
+  "datasets": [
+    {
+      "name": "32897adc",
+      "displayName": "traits",
+      "query": "SELECT distinct chr_id,disease_trait,link FROM db_omics_solacc.dbgap_db.gwas_catalog_full\nWHERE chr_id in  ('22','21','20','19')"
+    },
+    {
+      "name": "454db18a",
+      "displayName": "sample_stats",
+      "query": "select sqc.sampleId, si.population,si.population_description,si.gender,sqc.*\nfrom db_omics_solacc.variant_db.glow_chr22_sample_qc sqc\njoin db_omics_solacc.phenotype_db.sample_information si\non sqc.sampleId = si.sample\nwhere sqc.rHetHomVar > :min_rHetHom and sqc.rHetHomVar < :max_rHetHom\n",
+      "parameters": [
+        {
+          "displayName": "min_rHetHom",
+          "keyword": "min_rHetHom",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "displayName": "max_rHetHom",
+          "keyword": "max_rHetHom",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "46e69c91",
+      "displayName": "sample_information",
+      "query": "select sample,family_id,population, population_description, gender, COUNT(*) OVER (PARTITION BY family_id) AS n_per_family\nfrom db_omics_solacc.phenotype_db.sample_information \norder by 6 desc"
+    },
+    {
+      "name": "57398092",
+      "displayName": "gwas_catalog",
+      "query": "SELECT chr_id,snps,strongest_snp_risk_allele, disease_trait,link,study,chr_pos,mapped_gene,snp_gene_ids, risk_allele_frequency  FROM db_omics_solacc.dbgap_db.gwas_catalog_full\nWHERE chr_id in  ('22','21','20','19')"
+    },
+    {
+      "name": "6d37e628",
+      "displayName": "population_descriptions",
+      "query": "select distinct population,population_description\nfrom db_omics_solacc.phenotype_db.sample_information\norder by population"
+    },
+    {
+      "name": "c6c07c87",
+      "displayName": "variant_stats",
+      "query": "\nwith var_statst as (\n    SELECT contigName, start as pos, floor(start/1e6,2) as pos_Mb, referenceAllele, nHet, nHom, attributes.ALL_AF\n    FROM db_omics_solacc.variant_db.glow_chr22_variant_stats\n)\nselect contigName, pos, pos_Mb, ALL_AF as AF,\navg(nHet) OVER (PARTITION BY pos_Mb) as avg_nHet,\navg(nHom) OVER (PARTITION BY pos_Mb) as avg_nHom\nfrom var_statst\nwhere pos_Mb > :start_pos and pos_Mb < :end_pos",
+      "parameters": [
+        {
+          "displayName": "start_pos",
+          "keyword": "start_pos",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "0"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "displayName": "end_pos",
+          "keyword": "end_pos",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "fba223c8",
+      "displayName": "genotype_frequencies",
+      "query": "select distinct varId, genotype, population, sum(1) over (partition by genotype, population)/sum(1) over (partition by population) as genotype_frequency from hls_lifesciences.variant_db.chr22_sample_vars_pop\nwhere varId = :var_id",
+      "parameters": [
+        {
+          "displayName": "var_id",
+          "keyword": "var_id",
+          "dataType": "STRING",
+          "defaultSelection": {
+            "values": {
+              "dataType": "STRING",
+              "values": [
+                {
+                  "value": "rs760648"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "fd9330da",
+      "displayName": "chr22_sample_vars_pop",
+      "query": "SELECT * FROM hls_lifesciences.variant_db.chr22_sample_vars_pop"
+    }
+  ],
+  "pages": [
+    {
+      "name": "4490dcd9",
+      "displayName": "New Page",
+      "layout": [
+        {
+          "widget": {
+            "name": "0573d27e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fba223c8",
+                  "fields": [
+                    {
+                      "name": "genotype",
+                      "expression": "`genotype`"
+                    },
+                    {
+                      "name": "genotype_frequency",
+                      "expression": "`genotype_frequency`"
+                    },
+                    {
+                      "name": "population",
+                      "expression": "`population`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "population",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "population"
+                },
+                "y": {
+                  "fieldName": "genotype_frequency",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "genotype_frequency"
+                },
+                "color": {
+                  "fieldName": "genotype",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "genotype"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Genotype Frequencies by Population"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 57,
+            "width": 4,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "0e41d10c",
+            "queries": [
+              {
+                "name": "dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef293aef81ec9864a7b147e6517dc_chr_id",
+                "query": {
+                  "datasetName": "57398092",
+                  "fields": [
+                    {
+                      "name": "chr_id",
+                      "expression": "`chr_id`"
+                    },
+                    {
+                      "name": "chr_id_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "chr_id",
+                    "displayName": "chr_id",
+                    "queryName": "dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef293aef81ec9864a7b147e6517dc_chr_id"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "",
+                "showDescription": true,
+                "description": "chromosome id for GWAS catalog"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 47,
+            "width": 4,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "161807b2",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "46e69c91",
+                  "fields": [
+                    {
+                      "name": "countdistinct(population)",
+                      "expression": "COUNT(DISTINCT `population`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(population)",
+                  "displayName": "Count of Unique population"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Number of Populations"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 3,
+            "width": 1,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "16ddcff2",
+            "queries": [
+              {
+                "name": "parameter_dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef2b68b66145d91bd7edcddf5e4b0_start_pos",
+                "query": {
+                  "datasetName": "c6c07c87",
+                  "parameters": [
+                    {
+                      "name": "start_pos",
+                      "keyword": "start_pos"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "parameterName": "start_pos",
+                    "queryName": "parameter_dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef2b68b66145d91bd7edcddf5e4b0_start_pos"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "title": "",
+                "description": "start position in Mb"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 37,
+            "width": 1,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "1d0bb29b",
+            "textbox_spec": "## Sample Summary Statistics"
+          },
+          "position": {
+            "x": 0,
+            "y": 15,
+            "width": 6,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "237b1d03",
+            "textbox_spec": "#  Look up samples with a given risk factor\nSearch for reported SNPs for a given disease/trait from GWAS Catalog and based on the results look up for samples with high-risk alelle"
+          },
+          "position": {
+            "x": 0,
+            "y": 45,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "29c17899",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "32897adc",
+                  "fields": [
+                    {
+                      "name": "chr_id",
+                      "expression": "`chr_id`"
+                    },
+                    {
+                      "name": "disease_trait",
+                      "expression": "`disease_trait`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "chr_id",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100000,
+                    "title": "chr_id",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "chr_id"
+                  },
+                  {
+                    "fieldName": "disease_trait",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100001,
+                    "title": "disease_trait",
+                    "allowSearch": true,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "disease_trait"
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "link",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100002,
+                  "title": "link",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": "List of disease/traits with reported association ",
+                "description": ""
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 49,
+            "width": 2,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "33a2efc2",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "454db18a",
+                  "fields": [
+                    {
+                      "name": "nHet",
+                      "expression": "`nHet`"
+                    },
+                    {
+                      "name": "population",
+                      "expression": "`population`"
+                    },
+                    {
+                      "name": "rHetHomVar",
+                      "expression": "`rHetHomVar`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "nHet",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "nHet"
+                },
+                "y": {
+                  "fieldName": "rHetHomVar",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "rHetHomVar"
+                },
+                "color": {
+                  "fieldName": "population",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "population"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "nHet/Hom vs nHet by population "
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 26,
+            "width": 6,
+            "height": 9
+          }
+        },
+        {
+          "widget": {
+            "name": "39adbf03",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "46e69c91",
+                  "fields": [
+                    {
+                      "name": "countdistinct(family_id)",
+                      "expression": "COUNT(DISTINCT `family_id`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "countdistinct(family_id)",
+                  "displayName": "Count of Unique family_id"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Number of Families in the Dataset"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 3,
+            "width": 1,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "3b730d6f",
+            "queries": [
+              {
+                "name": "dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eeeaee393f1b54a0cc22e0defb4fcb_population_description",
+                "query": {
+                  "datasetName": "46e69c91",
+                  "fields": [
+                    {
+                      "name": "population_description",
+                      "expression": "`population_description`"
+                    },
+                    {
+                      "name": "population_description_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "population_description",
+                    "displayName": "population_description",
+                    "queryName": "dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eeeaee393f1b54a0cc22e0defb4fcb_population_description"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Select Population(s) to Display",
+                "showDescription": false
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 1,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "4b7494f7",
+            "queries": [
+              {
+                "name": "parameter_dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef2b68b66145d91bd7edcddf5e4b0_end_pos",
+                "query": {
+                  "datasetName": "c6c07c87",
+                  "parameters": [
+                    {
+                      "name": "end_pos",
+                      "keyword": "end_pos"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "parameterName": "end_pos",
+                    "queryName": "parameter_dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef2b68b66145d91bd7edcddf5e4b0_end_pos"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "description": "end position on Mb",
+                "title": ""
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 38,
+            "width": 1,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "52f3c39b",
+            "queries": [
+              {
+                "name": "parameter_dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef8392af51b63a7dbd91d7762198f_var_id",
+                "query": {
+                  "datasetName": "fba223c8",
+                  "parameters": [
+                    {
+                      "name": "var_id",
+                      "keyword": "var_id"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "parameterName": "var_id",
+                    "queryName": "parameter_dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef8392af51b63a7dbd91d7762198f_var_id"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": false
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 56,
+            "width": 2,
+            "height": 1
+          }
+        },
+        {
+          "widget": {
+            "name": "5ea7ffb9",
+            "textbox_spec": "## Variant Summary Statistics"
+          },
+          "position": {
+            "x": 0,
+            "y": 35,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "72ae13ef",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "454db18a",
+                  "fields": [
+                    {
+                      "name": "avg(rHetHomVar)",
+                      "expression": "AVG(`rHetHomVar`)"
+                    },
+                    {
+                      "name": "population",
+                      "expression": "`population`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "population",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y"
+                    }
+                  },
+                  "displayName": "population"
+                },
+                "y": {
+                  "fieldName": "avg(rHetHomVar)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Average rHetHomVar"
+                },
+                "color": {
+                  "fieldName": "population",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "population"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "description": "",
+                "title": "Average ratio of Het/Hom by population"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 18,
+            "width": 4,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "7377bd8f",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "46e69c91",
+                  "fields": [
+                    {
+                      "name": "count(*)",
+                      "expression": "COUNT(`*`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "count(*)",
+                  "displayName": "Count of Records"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Number of Samples"
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 3,
+            "width": 1,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "781a5d21",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "46e69c91",
+                  "fields": [
+                    {
+                      "name": "gender",
+                      "expression": "`gender`"
+                    },
+                    {
+                      "name": "n_per_family",
+                      "expression": "`n_per_family`"
+                    },
+                    {
+                      "name": "population",
+                      "expression": "`population`"
+                    },
+                    {
+                      "name": "sample",
+                      "expression": "`sample`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "sample",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100000,
+                    "title": "sample",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "sample"
+                  },
+                  {
+                    "fieldName": "population",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100002,
+                    "title": "population",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "population"
+                  },
+                  {
+                    "fieldName": "gender",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100004,
+                    "title": "gender",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "gender"
+                  },
+                  {
+                    "fieldName": "n_per_family",
+                    "numberFormat": "0",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "integer",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 100005,
+                    "title": "n_per_family",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "n_per_family"
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "family_id",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100001,
+                  "title": "family_id",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "population_description",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100003,
+                  "title": "population_description",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": "Sample Information"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 7,
+            "width": 2,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "79a1fb23",
+            "textbox_spec": "# 1000 Genomes Data Explorer\n\nThis dashboard allows users to explore samples within the 1000 Genomes dataset for various purposes:\n\n- Exploring samples for a specific population.\n- Accessing sample-level summary statistics, such as Het/Home ratio and nDeletions, across different populations.\n- Generating cohorts based on identified risk alleles from GWAS catalog data."
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "8fba0d45",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "46e69c91",
+                  "fields": [
+                    {
+                      "name": "count(gender)",
+                      "expression": "COUNT(`gender`)"
+                    },
+                    {
+                      "name": "gender",
+                      "expression": "`gender`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "count(gender)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Count of gender"
+                },
+                "color": {
+                  "fieldName": "gender",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "gender"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "title": "Gender Distribution"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 3,
+            "width": 2,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "93daff5a",
+            "queries": [
+              {
+                "name": "dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef2a063aa1604b4bb71f5e476ef8d_chr_id",
+                "query": {
+                  "datasetName": "32897adc",
+                  "fields": [
+                    {
+                      "name": "chr_id",
+                      "expression": "`chr_id`"
+                    },
+                    {
+                      "name": "chr_id_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "chr_id",
+                    "displayName": "chr_id",
+                    "queryName": "dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef2a063aa1604b4bb71f5e476ef8d_chr_id"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": true,
+                "title": "",
+                "description": "chromosme id for trait dataset"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 47,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "94dd95d6",
+            "queries": [
+              {
+                "name": "dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef86a9bc918d1bf69cb17d8dd1b76_varId",
+                "query": {
+                  "datasetName": "fd9330da",
+                  "fields": [
+                    {
+                      "name": "varId",
+                      "expression": "`varId`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-text-entry",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "varId",
+                    "displayName": "varId",
+                    "queryName": "dashboards/01eeeaee0d291721bd550b0a82cb0742/datasets/01eef86a9bc918d1bf69cb17d8dd1b76_varId"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "",
+                "showDescription": true,
+                "description": "look up a variant of interest "
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 56,
+            "width": 2,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "cbf8e549",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fd9330da",
+                  "fields": [
+                    {
+                      "name": "gender",
+                      "expression": "`gender`"
+                    },
+                    {
+                      "name": "genotype",
+                      "expression": "`genotype`"
+                    },
+                    {
+                      "name": "population",
+                      "expression": "`population`"
+                    },
+                    {
+                      "name": "sampleId",
+                      "expression": "`sampleId`"
+                    },
+                    {
+                      "name": "varId",
+                      "expression": "`varId`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "varId",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100002,
+                    "title": "varId",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "varId"
+                  },
+                  {
+                    "fieldName": "sampleId",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100003,
+                    "title": "sampleId",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "sampleId"
+                  },
+                  {
+                    "fieldName": "genotype",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100004,
+                    "title": "genotype",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "genotype"
+                  },
+                  {
+                    "fieldName": "population",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100008,
+                    "title": "population",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "population"
+                  },
+                  {
+                    "fieldName": "gender",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 100010,
+                    "title": "gender",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "gender"
+                  }
+                ]
+              },
+              "invisibleColumns": [
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "chr",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100000,
+                  "title": "chr",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "start",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 100001,
+                  "title": "start",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "numberFormat": "0",
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "genotype_call",
+                  "type": "integer",
+                  "displayAs": "number",
+                  "order": 100005,
+                  "title": "genotype_call",
+                  "allowSearch": false,
+                  "alignContent": "right",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "sample",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100006,
+                  "title": "sample",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "family_id",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100007,
+                  "title": "family_id",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                },
+                {
+                  "booleanValues": [
+                    "false",
+                    "true"
+                  ],
+                  "imageUrlTemplate": "{{ @ }}",
+                  "imageTitleTemplate": "{{ @ }}",
+                  "imageWidth": "",
+                  "imageHeight": "",
+                  "linkUrlTemplate": "{{ @ }}",
+                  "linkTextTemplate": "{{ @ }}",
+                  "linkTitleTemplate": "{{ @ }}",
+                  "linkOpenInNewTab": true,
+                  "name": "population_description",
+                  "type": "string",
+                  "displayAs": "string",
+                  "order": 100009,
+                  "title": "population_description",
+                  "allowSearch": false,
+                  "alignContent": "left",
+                  "allowHTML": false,
+                  "highlightLinks": false,
+                  "useMonospaceFont": false,
+                  "preserveWhitespace": false
+                }
+              ],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 58,
+            "width": 2,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "cdc9420b",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "6d37e628",
+                  "fields": [
+                    {
+                      "name": "population",
+                      "expression": "`population`"
+                    },
+                    {
+                      "name": "population_description",
+                      "expression": "`population_description`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "population",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 0,
+                    "title": "population",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "population"
+                  },
+                  {
+                    "fieldName": "population_description",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 1,
+                    "title": "population_description",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "population_description"
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 10,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": "Population Description"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 2,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "d968c8cc",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "46e69c91",
+                  "fields": [
+                    {
+                      "name": "count(population)",
+                      "expression": "COUNT(`population`)"
+                    },
+                    {
+                      "name": "population",
+                      "expression": "`population`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "population",
+                  "scale": {
+                    "type": "categorical"
+                  },
+                  "displayName": "population"
+                },
+                "y": {
+                  "fieldName": "count(population)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Count of population"
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "showDescription": false,
+                "title": "Counts of Samples by Population"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 4,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "db8d0a89",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "57398092",
+                  "fields": [
+                    {
+                      "name": "chr_id",
+                      "expression": "`chr_id`"
+                    },
+                    {
+                      "name": "chr_pos",
+                      "expression": "`chr_pos`"
+                    },
+                    {
+                      "name": "disease_trait",
+                      "expression": "`disease_trait`"
+                    },
+                    {
+                      "name": "link",
+                      "expression": "`link`"
+                    },
+                    {
+                      "name": "mapped_gene",
+                      "expression": "`mapped_gene`"
+                    },
+                    {
+                      "name": "risk_allele_frequency",
+                      "expression": "`risk_allele_frequency`"
+                    },
+                    {
+                      "name": "snp_gene_ids",
+                      "expression": "`snp_gene_ids`"
+                    },
+                    {
+                      "name": "snps",
+                      "expression": "`snps`"
+                    },
+                    {
+                      "name": "strongest_snp_risk_allele",
+                      "expression": "`strongest_snp_risk_allele`"
+                    },
+                    {
+                      "name": "study",
+                      "expression": "`study`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 1,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "disease_trait",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 0,
+                    "title": "disease_trait",
+                    "allowSearch": true,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "description": "",
+                    "cellFormat": {
+                      "default": {
+                        "foregroundColor": null
+                      },
+                      "rules": [
+                        {
+                          "if": {
+                            "column": "disease_trait",
+                            "fn": "=",
+                            "literal": ""
+                          },
+                          "value": {
+                            "foregroundColor": null
+                          }
+                        }
+                      ]
+                    },
+                    "displayName": "disease_trait"
+                  },
+                  {
+                    "fieldName": "chr_id",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 1,
+                    "title": "chr_id",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "chr_id"
+                  },
+                  {
+                    "fieldName": "snps",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 2,
+                    "title": "snps",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "snps"
+                  },
+                  {
+                    "fieldName": "chr_pos",
+                    "numberFormat": "0.00",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "float",
+                    "displayAs": "number",
+                    "visible": true,
+                    "order": 3,
+                    "title": "chr_pos",
+                    "allowSearch": false,
+                    "alignContent": "right",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "chr_pos"
+                  },
+                  {
+                    "fieldName": "strongest_snp_risk_allele",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 4,
+                    "title": "strongest_snp_risk_allele",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "strongest_snp_risk_allele"
+                  },
+                  {
+                    "fieldName": "link",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 5,
+                    "title": "link",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": true,
+                    "highlightLinks": true,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "defaultColumnWidth": 0,
+                    "displayName": "link"
+                  },
+                  {
+                    "fieldName": "study",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 6,
+                    "title": "study",
+                    "allowSearch": true,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "study"
+                  },
+                  {
+                    "fieldName": "snp_gene_ids",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 7,
+                    "title": "snp_gene_ids",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "snp_gene_ids"
+                  },
+                  {
+                    "fieldName": "mapped_gene",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 8,
+                    "title": "mapped_gene",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "mapped_gene"
+                  },
+                  {
+                    "fieldName": "risk_allele_frequency",
+                    "booleanValues": [
+                      "false",
+                      "true"
+                    ],
+                    "imageUrlTemplate": "{{ @ }}",
+                    "imageTitleTemplate": "{{ @ }}",
+                    "imageWidth": "",
+                    "imageHeight": "",
+                    "linkUrlTemplate": "{{ @ }}",
+                    "linkTextTemplate": "{{ @ }}",
+                    "linkTitleTemplate": "{{ @ }}",
+                    "linkOpenInNewTab": true,
+                    "type": "string",
+                    "displayAs": "string",
+                    "visible": true,
+                    "order": 9,
+                    "title": "risk_allele_frequency",
+                    "allowSearch": false,
+                    "alignContent": "left",
+                    "allowHTML": false,
+                    "highlightLinks": false,
+                    "useMonospaceFont": false,
+                    "preserveWhitespace": false,
+                    "displayName": "risk_allele_frequency"
+                  }
+                ]
+              },
+              "invisibleColumns": [],
+              "allowHTMLByDefault": false,
+              "itemsPerPage": 25,
+              "paginationSize": "default",
+              "condensed": true,
+              "withRowNumber": false,
+              "frame": {
+                "showTitle": true,
+                "title": "Associated SNPs for a given trait ",
+                "showDescription": true,
+                "description": "look up a disease or trait of interest on a given chromosome"
+              }
+            }
+          },
+          "position": {
+            "x": 2,
+            "y": 49,
+            "width": 4,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "fc8d9996",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c6c07c87",
+                  "fields": [
+                    {
+                      "name": "avg_nHet",
+                      "expression": "`avg_nHet`"
+                    },
+                    {
+                      "name": "pos_Mb",
+                      "expression": "`pos_Mb`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "heatmap",
+              "encodings": {
+                "x": {
+                  "fieldName": "pos_Mb",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "pos_Mb"
+                },
+                "y": {
+                  "fieldName": "avg_nHet",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "avg_nHet"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Heterozygousity ",
+                "showDescription": true,
+                "description": "Heterozygousity along the chromosome"
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 37,
+            "width": 5,
+            "height": 8
+          }
+        }
+      ]
+    }
+  ]
+}
