@@ -9,7 +9,8 @@ This solution accelerator is aimed at Computational Biologists working with geno
 
 Primarily, we leverage [Project Glow](https://github.com/projectglow/glow) to access 1000 Genomes Project data stored in public cloud repositories. We compute various sample-level and variant-level summary statistics, constructing a database of human genetic variation alongside GWAS catalog data. Subsequently, we develop an interactive dashboard facilitating exploration of genetic variation across different populations and facilitating the identification of samples associated with specific risk alleles for particular traits or diseases.
 
-![](https://github.com/databricks-industry-solutions/db-omics/blob/53a78f42b9bb679c20094b62cd67c160b71c64e0/images/1KGDash.gif)
+<img src=https://github.com/databricks-industry-solutions/db-omics/blob/53a78f42b9bb679c20094b62cd67c160b71c64e0/images/1KGDash.gif width="300px">
+<img src=https://github.com/databricks-industry-solutions/db-omics/blob/53a78f42b9bb679c20094b62cd67c160b71c64e0/images/1KGDash2.gif width="300px">
 
 To create the dashboard, you can simply import the lakeview dashboard's JSON file located in `./resources/1000 Genome Samples Dashboard.lvdash.json` in [Lakeview](https://docs.databricks.com/en/dashboards/lakeview.html).
 
