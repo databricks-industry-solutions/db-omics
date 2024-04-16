@@ -9,13 +9,13 @@ This solution accelerator is aimed at Computational Biologists working with geno
 
 Primarily, we leverage [Project Glow](https://github.com/projectglow/glow) to access and ingest 1000 Genomes Project data from public cloud storage. We compute various sample-level and variant-level summary statistics, constructing a database of human genetic variation alongside GWAS catalog data. Subsequently, we develop an interactive dashboard facilitating exploration of genetic variation across different populations and facilitating the identification of samples associated with specific risk alleles for particular traits or diseases.
 
-[![D1](https://github.com/databricks-industry-solutions/db-omics/blob/53a78f42b9bb679c20094b62cd67c160b71c64e0/images/1KGDash.gif)]([image1.jpg](https://github.com/databricks-industry-solutions/db-omics/blob/53a78f42b9bb679c20094b62cd67c160b71c64e0/images/1KGDash.gif))[![D2](https://github.com/databricks-industry-solutions/db-omics/blob/4d28335ede5561201abe05d23e25ef8a37c9bd84/images/1KGDash2.gif)](https://github.com/databricks-industry-solutions/db-omics/blob/4d28335ede5561201abe05d23e25ef8a37c9bd84/images/1KGDash2.gif)
+[![D1](https://raw.githubusercontent.com/databricks-industry-solutions/db-omics/87cd650fc82888fb04c3d8349388c82482015bdd/images/1KGDash.gif)]([image1.jpg](https://github.com/databricks-industry-solutions/db-omics/blob/53a78f42b9bb679c20094b62cd67c160b71c64e0/images/1KGDash.gif)[![D2](https://raw.githubusercontent.com/databricks-industry-solutions/db-omics/87cd650fc82888fb04c3d8349388c82482015bdd/images/1KGDash2.gif)](https://github.com/databricks-industry-solutions/db-omics/blob/4d28335ede5561201abe05d23e25ef8a37c9bd84/images/1KGDash2.gif)
 
 To create the dashboard, you can simply import the lakeview dashboard's JSON file located in `./resources/1000 Genome Samples Dashboard.lvdash.json` in [Lakeview](https://docs.databricks.com/en/dashboards/lakeview.html).
 
-### 1000 Genomes Project Variant Data: 
 
 ## Datasets
+### 1000 Genomes Project Variant Data: 
 
 The [1000 Genomes Project](https://www.internationalgenome.org/) began in 2008 with the aim of mapping human genetic variation. It entailed sequencing the genomes of more than 2,500 individuals from 26 diverse populations worldwide.
 The project sought to construct a detailed map of genetic distinctions within human DNA. By analyzing genomes from a broad and varied sample, it identified millions of genetic variants, including single nucleotide polymorphisms (SNPs) and structural variations like insertions, deletions, and copy number variations.
