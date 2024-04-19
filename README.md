@@ -26,8 +26,41 @@ Data from the 1000 Genomes Project serves as a vital tool for researchers invest
 The GWAS Catalog, a [collaboration between NHGRI and EMBL-EBI](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6323933/), is a curated repository of published genome-wide association studies (GWAS). It houses information on genetic variants, traits, and p-values from these studies, serving as a community resource for data access and analysis tools. The Catalog adheres to FAIR principles, encouraging study identifier citation and offering APIs for data access. Future plans include incorporating unpublished GWAS data. Overall, it is an invaluable asset for researchers exploring the genetic underpinnings of human traits and diseases.
 
 ## Reference Architecture
-[![](https://mermaid.ink/img/pako:eNp1U8tu2zAQ_BVCubSAo5edtNahgCzRaYAUKOrUFykQaIm2CNOkSlJWjCDf0mMv_bh-Qley4kfhXoTV7OzOzpJ8sXJZUCuwVopUJXr4lgpdL_Y_szsPJXhy_5SKSfI4mweoNKbSgeMsTWV7ruuuqJAbqm26YDbJ7XrtbCX32rSTpsLQvBQsJ9xppFozsXJ81xu6t-5tpsmm4jRjYilb5iXcNs8GlKO9ctM0JyqrhmiHVMzRlKi8dArZCC5JoZ1lzTlUUVGcGfFRoocw-MnQTlUSTT0H2GEyj6YBykvl-_bsc_gV3z_6MIShUG9oke2p2Xb41vqs-RAlMTFkoVi-1k9nqRFKvgtmdigCAperVgxdX6M_P3_9RndcNgjcgziqiNJUQeoTCsNkBZmsGyfbQqI9gC41mSQnG1IbYpgU7ZK6bBQl7WKyfK-V9bsIW8WjYMuM41OJvuWP_DIZ4wvz_LvgG5Q8kDXdMtr0XexW592cKEaEQfi54lKBQ_CLYqLLhSSqeA_GJj0VXESHMI4PIcaHsBOFD-oOwOw47e7oknEeXMURdrF_xP3_4MMeH3_0XD8c5BLmCq6m4-mH6QgdaaOehjGO8fiI35zhUGANrA2Fo2AFvKIXcIdSy5R0Q1MrgLCgS1Jzk1qpeAVqXRVwo3DBjFRWYFRNBxapjZztRP72v-fEjMByN1awJFwDSruaL_vX2j3a17-e5EPD?type=png)](https://mermaid.live/edit#pako:eNp1U8tu2zAQ_BVCubSAo5edtNahgCzRaYAUKOrUFykQaIm2CNOkSlJWjCDf0mMv_bh-Qley4kfhXoTV7OzOzpJ8sXJZUCuwVopUJXr4lgpdL_Y_szsPJXhy_5SKSfI4mweoNKbSgeMsTWV7ruuuqJAbqm26YDbJ7XrtbCX32rSTpsLQvBQsJ9xppFozsXJ81xu6t-5tpsmm4jRjYilb5iXcNs8GlKO9ctM0JyqrhmiHVMzRlKi8dArZCC5JoZ1lzTlUUVGcGfFRoocw-MnQTlUSTT0H2GEyj6YBykvl-_bsc_gV3z_6MIShUG9oke2p2Xb41vqs-RAlMTFkoVi-1k9nqRFKvgtmdigCAperVgxdX6M_P3_9RndcNgjcgziqiNJUQeoTCsNkBZmsGyfbQqI9gC41mSQnG1IbYpgU7ZK6bBQl7WKyfK-V9bsIW8WjYMuM41OJvuWP_DIZ4wvz_LvgG5Q8kDXdMtr0XexW592cKEaEQfi54lKBQ_CLYqLLhSSqeA_GJj0VXESHMI4PIcaHsBOFD-oOwOw47e7oknEeXMURdrF_xP3_4MMeH3_0XD8c5BLmCq6m4-mH6QgdaaOehjGO8fiI35zhUGANrA2Fo2AFvKIXcIdSy5R0Q1MrgLCgS1Jzk1qpeAVqXRVwo3DBjFRWYFRNBxapjZztRP72v-fEjMByN1awJFwDSruaL_vX2j3a17-e5EPD)
 
+```mermaid
+graph LR
+subgraph SG1 [EBI]
+B[TSV: https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/\ntechnical/working/20130606_sample_info/\n20130606_sample_info.txt]
+C[TSV: www.ebi.ac.uk/gwas/api/search/downloads/full]
+end
+subgraph SG2 [s3://1000genomes/phase1/]
+A[VCF: chr22.SHAPEIT2_integrated_phase1_v3]
+end
+
+subgraph SG3 [Databricks]
+subgraph SG4 [Unity Catalog]
+A -- 🧬 Glow \nVCF parser --> AA[glow_chr22_vars]
+B --> BB[sample_information]
+C --> CC[gwas_catalog_full]
+AA --🧬 Glow --> DD[glow_chr22_sample_qc]
+AA --🧬 Glow --> EE[glow_chr22_vars]
+end
+subgraph SG5 [Lakeview]
+AA -.-> D(Variant Explorer \n Dashboard)
+BB -.-> D
+CC -.-> D
+DD -.-> D
+EE -.-> D
+end
+end 
+
+style SG1 fill:#DCE0E2
+style SG2 fill:#DCE0E2
+style SG3 fill:#98102A,color:#F9F7F4 
+style SG4 fill:#EEEDE9
+style SG5 fill:#EEEDE9 
+
+```
 
 ## Authors
 <amir.kermany@databricks.com>
